@@ -16,18 +16,19 @@ export default class Todo extends Component {
         this.handleAdd = this.handleAdd.bind(this);
 
         this.handleRemove = this.handleRemove.bind(this);
+        this.handleMarkAsDone = this.handleMarkAsDone.bind(this);
+        this.handleMarkAsPending = this.handleMarkAsPending.bind(this);
 
         this.refresh();
-    }
-
-    handleRemove(todo) {
-        axios.delete(`${URL}/${todo._id}`)
-        .then(resp => this.refresh());
     }
 
     refresh() {
         axios.get(`${URL}?sort=-createdAt`)
             .then(resp => this.setState({...this.state, description: "", list: resp.data}))
+    }
+
+    handleChange(e) {
+        this.setState({...this.state, description: e.target.value});
     }
 
     handleAdd() {
@@ -36,8 +37,19 @@ export default class Todo extends Component {
             .then(resp => this.refresh());
     }
 
-    handleChange(e) {
-        this.setState({...this.state, description: e.target.value});
+    handleRemove(todo) {
+        axios.delete(`${URL}/${todo._id}`)
+        .then(resp => this.refresh());
+    }
+
+    handleMarkAsDone(todo) {
+        axios.put(`${URL}/${todo._id}`, { ...todo, done: true })
+        .then(resp => this.refresh());
+    }
+
+    handleMarkAsPending(todo) {
+        axios.put(`${URL}/${todo._id}`, { ...todo, done: false })
+        .then(resp => this.refresh());
     }
     
     render() {
@@ -49,8 +61,12 @@ export default class Todo extends Component {
                     handleAdd={this.handleAdd} 
                     handleChange={this.handleChange}  
                 />
-                <TodoList list={this.state.list}
-                    handleRemove={this.handleRemove} />
+                <TodoList 
+                    list={this.state.list}
+                    handleRemove={this.handleRemove} 
+                    handleMarkAsDone={this.handleMarkAsDone}
+                    handleMarkAsPending={this.handleMarkAsPending}
+                />
             </div>
         )
     }
